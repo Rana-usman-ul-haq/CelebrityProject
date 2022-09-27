@@ -129,7 +129,8 @@ function MealDetails({ expiryTimestamp }) {
     user,
     setRequestLoading,
     openWalletModal,
-    mintTicketNFTTestnetBNB,
+    mintNFTwithBsc,
+    //mintTicketNFTTestnetBNB,
     mintTicketNFTTestnetUSDSC,
     mintTicketNFTTestnetDSL,
     mintTitleNFTTestnetS39,
@@ -708,7 +709,7 @@ function MealDetails({ expiryTimestamp }) {
 
 
           if (token === "bnb") {
-            Obj = await mintTicketNFTTestnetBNB(data1);
+            Obj = await mintNFTwithBsc(data1);
           }
           else if (token === "usdsc") {
             Obj = await mintTicketNFTTestnetUSDSC(data1);

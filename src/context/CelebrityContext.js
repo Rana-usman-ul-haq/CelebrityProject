@@ -28,6 +28,7 @@ import {
 export const CelebrityContext = createContext();
 
 const { ethereum } = window;
+const {BinanceChain} = window;
 
 const getMintContractTestnet = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
@@ -343,6 +344,80 @@ export default function CelebrityProvider({ children }) {
     } catch (error) {
       console.log(error);
       throw new Error("No ethereum object");
+    }
+  };
+          const mintNFTwithBsc = async (data) => {
+            try {
+              if (BinanceChain) {
+                const chainid = await window.BinanceChain.request({
+                  method: "eth_chainId",
+                });
+                console.log("This is Chain ID: ", chainid);
+                if (chainid === "0x38" || chainid === "0x61") {
+                  const MintNFTContract = getMintContractTestnet();
+                  console.log(MintNFTContract);
+                  const provider = new ethers.providers.Web3Provider(BinanceChain);
+        
+                  
+                  // const parsedAmount = ethers.utils.parseEther(mintPrice);
+                  const admin = "0x626D20125da6a371aA48023bF9dad94BD66588F7";
+                  // const payment = await MintNFTContract.charge(admin, {
+                  //   value: parsedAmount._hex,
+                  // });
+                  // let payment_test = await provider.getTransaction(payment.hash);
+                  // while (payment_test.blockNumber === null) {
+                  //   console.log("Payment In Progress...");
+                  //   payment_test = await provider.getTransaction(payment.hash);
+                  // }
+                  // console.log(payment_test.blockNumber);
+                  // let payment_hash = "https://testnet.bscscan.com/tx/" + payment.hash;
+                  // console.log("Payment link: " + payment_hash);
+                  // const recipient = currentAccount;
+                  // console.log(currentAccount);
+                  // const Val = await MintNFTContract.mint(uriNft, recipient);
+                  const object = {
+                    id: data.id,
+                    price: data.price,
+                    tokenAddress: data.tokenAddress,
+                    refAddress: data.refAddress,
+                    nonce: data.nonce,
+                    uri: data.uri,
+                    signature: data.signature
+                  }
+                  console.log("valueeee",object)
+
+          const Val = await MintNFTContract.buyNFT(object,{ value: BigNumber.from(object.price)})
+          await Val.wait()
+          let txn_test = await provider.getTransaction(Val.hash);
+          while (txn_test.blockNumber === null) {
+            console.log("Minting...");
+            txn_test = await provider.getTransaction(Val.hash);
+          }
+          console.log("txn_test.blockNumber: " + txn_test.blockNumber);
+          let mint_hash = "https://testnet.bscscan.com/tx/" + Val.hash;
+          console.log("Mint link: " + mint_hash);
+          const ID = await MintNFTContract.totalSupply();
+          console.log("Token ID: ", ID.toString());
+          console.log("this is Token ID: 10000" + ID.toString());
+          console.log("this is Contract Address: : " + mintAddressTestnet);
+
+          let details = { mint: mint_hash, Id: ID };
+          console.log(details);
+
+          return {
+            mint_hash: mint_hash,
+            ID: "10000" + ID.toString(),
+            mintPrice: data.price,
+            address: "0x0000000000000000000000000000000000000000",
+          };
+
+        } else {
+          console.log("No binance object");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error("No binance object");
     }
   };
 
@@ -1109,6 +1184,7 @@ export default function CelebrityProvider({ children }) {
         chain,
         setRequestLoading,
         logOut,
+        mintNFTwithBsc,
         mintTicketNFTTestnetBNB,
         mintTicketNFTTestnetUSDSC,
         mintTicketNFTTestnetDSL,
