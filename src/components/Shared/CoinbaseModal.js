@@ -148,7 +148,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const CoinbaseModal = () => {
-    const { coinbaseModal, closeCoinbaseModal, connectToCoinbase, connectToBinance } = useContext(CelebrityContext);
+    const { coinbaseModal, closeCoinbaseModal, connectToCoinbase, connectToBinance, connectToWalletConnect } = useContext(CelebrityContext);
 
     return (
         <div className='dialogDiv-coinbase'>
@@ -186,6 +186,16 @@ const CoinbaseModal = () => {
                                         <Card.Img variant="top" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Binance_Logo.svg/1200px-Binance_Logo.svg.png" className="imgWallet" />
                                         <Card.Body>
                                             <Card.Title className='walletName wallet-texts'>Binance</Card.Title>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <Col>
+                                    <Card className='walletDiv border-0'
+                                        onClick={connectToWalletConnect}
+                                    >
+                                        <Card.Img variant="top" src="https://1000logos.net/wp-content/uploads/2022/05/WalletConnect-Logo-500x281.png" className="imgWallet" />
+                                        <Card.Body>
+                                            <Card.Title className='walletName wallet-texts'>WalletConnect</Card.Title>
                                         </Card.Body>
                                     </Card>
                                 </Col>

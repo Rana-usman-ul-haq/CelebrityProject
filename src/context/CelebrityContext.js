@@ -2,7 +2,9 @@ import { ethers, Contract, BigNumber } from "ethers";
 import { createContext, useEffect, useState } from "react";
 // import 'dotenv/config';
 import { v4 as uuidv4 } from "uuid";
-import abi from "../utils/nftAbi.json"
+import abi from "../utils/nftAbi.json";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+
 
 import axios from "axios";
 import swal from "sweetalert";
@@ -193,6 +195,7 @@ export default function CelebrityProvider({ children }) {
   const [coinbaseModal, setCoinbaseModal] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [BinanceModal, setBinanceModal] = useState(false);
+  const [WalletConnectModal, setWalletConnectModal] = useState(false);
 
 
   const openWalletModal = () => {
@@ -212,6 +215,13 @@ export default function CelebrityProvider({ children }) {
     setBinanceModal(true);
   };
   const closeBinanceModal = () => setBinanceModal(false);
+
+  const openWalletConnectModal = () => {
+    // (!user?.walletAddress || user?.walletAddress === "undefined") &&
+    setWalletConnectModal(true);
+  };
+  const closeWalletConnectModal = () => setWalletConnectModal(false);
+
 
   const openLoginModal = () => setLoginModal(true);
   const closeLoginModal = () => setLoginModal(false);
@@ -965,6 +975,103 @@ export default function CelebrityProvider({ children }) {
     }
   };
 
+  const connectToWalletConnect = async () => {
+    getBalanceTestnet();
+
+    if (typeof window.ethereum === "undefined") {
+      // ask the user to install the extension
+      return swal({
+        title: "Attention",
+        text: "Please open this website with wallet browsers",
+        icon: "warning",
+        button: "OK",
+        dangerMode: true,
+        className: "modal_class",
+      });
+    }
+    // Create a connector
+const connector = new WalletConnect({
+  bridge: "https://bridge.walletconnect.org", // Required
+  qrcodeModal: QRCodeModal,
+});
+
+
+    if (!connector.connected) {
+      // create new session
+      connector.createSession();
+    }
+    // let provider = window.ethereum;
+    let provider = new WalletConnectProvider({
+      infuraId: "4b08739152b5497aadaec6f2c3fca993",
+    });
+    await provider.enable();
+    
+    // edge case if MM and CBW are both installed
+    // if (window.provider?.length) {
+    //   window.ethereum.providers.forEach(async (p) => {
+    //     if (p.isCoinbaseWallet) provider = p;
+    //   });
+    // }
+// Subscribe to connection events
+connector.on("connect", (error, payload) => {
+  if (error) {
+    throw error;
+  }
+
+  // Get provided accounts and chainId
+  const { chainid } = payload.params[0];
+});
+    const chainid = await await web3.eth.getChainId();
+    
+    console.log("This is Chain ID: ", chainid);
+    setChain(chainid);
+    if (chainid === "0x61") {
+      const  accounts  = payload.params[0]
+
+      // const accounts = await provider.request({
+        // method: "web3.eth.getAccounts",
+        // method: "eth_requestAccounts"
+      // });
+      console.log(accounts[0]);
+      setCurrentAccount(accounts[0]);
+
+      await axios
+        .post(`https://backend.celebrity.sg/api/v1/user/`, {
+          walletAddress: accounts[0],
+        })
+        .then((res) => {
+          if (res.data.user) {
+            getBalanceTestnet();
+            setUser(res.data.user);
+            setLoading(false);
+            closeCoinbaseModal();
+            localStorage.setItem("tokenDsl", res.data.token);
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = `<p class='text-break text-white fs-6'>You have succesfully logged in with <br/>wallet connect.</p>`;
+            return swal({
+              title: "Success",
+              // text: "You have succesfully logged in with Binance Chain.",
+              content: wrapper,
+              icon: "success",
+              button: "OK",
+              // dangerMode: true,
+              className: "modal_class_success",
+            });
+          }
+        });
+    } else {
+      console.log("Please Switch to Binance Chain");
+      swal({
+        title: "Attention",
+        text: "Please change to Binance Chain (Testnet) before connecting.",
+        icon: "warning",
+        button: "OK",
+        dangerMode: true,
+        className: "modal_class",
+      });
+    }
+  };
+
   const connectToBinance = async () => {
     getBalanceTestnet();
 
@@ -1204,6 +1311,11 @@ export default function CelebrityProvider({ children }) {
         BinanceModal,
         openBinanceModal,
         closeBinanceModal,
+
+        connectToWalletConnect,
+        WalletConnectModal,
+        openWalletConnectModal,
+        closeWalletConnectModal,
 
 
         mintAddressTestnet,
