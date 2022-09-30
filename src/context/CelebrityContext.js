@@ -989,20 +989,12 @@ export default function CelebrityProvider({ children }) {
         className: "modal_class",
       });
     }
-    // Create a connector
-const connector = new WalletConnect({
-  bridge: "https://bridge.walletconnect.org", // Required
-  qrcodeModal: QRCodeModal,
-});
 
-
-    if (!connector.connected) {
-      // create new session
-      connector.createSession();
-    }
     // let provider = window.ethereum;
-    let provider = new WalletConnectProvider({
-      infuraId: "4b08739152b5497aadaec6f2c3fca993",
+    const provider = new WalletConnectProvider({
+      rpc: {
+        56: "https://bsc-dataseed1.binance.org/"
+      },
     });
     await provider.enable();
     
@@ -1012,21 +1004,12 @@ const connector = new WalletConnect({
     //     if (p.isCoinbaseWallet) provider = p;
     //   });
     // }
-// Subscribe to connection events
-connector.on("connect", (error, payload) => {
-  if (error) {
-    throw error;
-  }
-
-  // Get provided accounts and chainId
-  const { chainid } = payload.params[0];
-});
-    const chainid = await await web3.eth.getChainId();
+    const chainid =  await ethers.getChainId();
     
     console.log("This is Chain ID: ", chainid);
     setChain(chainid);
     if (chainid === "0x61") {
-      const  accounts  = payload.params[0]
+      const accounts = await ethers.getAccounts();
 
       // const accounts = await provider.request({
         // method: "web3.eth.getAccounts",
@@ -1041,7 +1024,7 @@ connector.on("connect", (error, payload) => {
         })
         .then((res) => {
           if (res.data.user) {
-            getBalanceTestnet();
+            getBalanceMainnet();
             setUser(res.data.user);
             setLoading(false);
             closeCoinbaseModal();
@@ -1063,7 +1046,7 @@ connector.on("connect", (error, payload) => {
       console.log("Please Switch to Binance Chain");
       swal({
         title: "Attention",
-        text: "Please change to Binance Chain (Testnet) before connecting.",
+        text: "Please change to Binance Chain (Mainnet) before connecting.",
         icon: "warning",
         button: "OK",
         dangerMode: true,
